@@ -9,6 +9,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -19,6 +20,8 @@ const Signup = () => {
       setError("Passwords do not match");
       return;
     }
+
+    setIsLoading(true);
 
     try {
       const response = await axios.post("/api/auth/signup", {
@@ -34,6 +37,8 @@ const Signup = () => {
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,6 +46,14 @@ const Signup = () => {
     <div className="signup-container">
       <div className="signup-wrapper">
         <h2>Sign Up</h2>
+
+        {isLoading && (
+          <div className="server-message">
+            Since the website has been deployed on a free server that automatically shuts down after inactivity,
+            the server may take up to 1 minute to wake up. Please wait...
+          </div>
+        )}
+
         <form onSubmit={handleSignup}>
           <div>
             <label htmlFor="username">Username:</label>
@@ -76,13 +89,20 @@ const Signup = () => {
             <label htmlFor="confirm-password">Confirm Password:</label>
             <input
               id="confirm-password"
+              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </div>
           {error && <p className="error">{error}</p>}
-          <button type="submit">Sign Up</button>
+          <button 
+            type="submit"
+            disabled={isLoading}
+            style={isLoading ? { backgroundColor: '#a5d6a7', cursor: 'not-allowed' } : {}}
+          >
+            {isLoading ? 'Signing up...' : 'Sign Up'}
+          </button>
         </form>
         <p>
           Already have an account?
